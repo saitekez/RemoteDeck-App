@@ -58,6 +58,23 @@ body.theme-contrast {
     --muted: #d5d5d5;
 }
 
+body.theme-matrix {
+    --bg: #020603;
+    --panel: #07140b;
+    --panel-strong: #0d2113;
+    --key: #102716;
+    --key-active: #008f45;
+    --accent: #00ff76;
+    --accent-blue: #8bffc4;
+    --border: #194d2b;
+    --border-bright: #2adb71;
+    --text: #ecfff2;
+    --muted: #91cfa4;
+    --danger: #ff5b6a;
+    --shadow: rgba(0, 0, 0, 0.74);
+    --inner-light: rgba(139, 255, 196, 0.13);
+}
+
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -93,6 +110,13 @@ body.theme-slate {
 body.theme-contrast {
     background:
         linear-gradient(180deg, #151515 0%, #050505 36%, #000000 100%);
+}
+
+body.theme-matrix {
+    background:
+        repeating-linear-gradient(90deg, rgba(0, 255, 118, 0.055) 0 1px, transparent 1px 28px),
+        repeating-linear-gradient(180deg, rgba(0, 255, 118, 0.040) 0 1px, transparent 1px 22px),
+        linear-gradient(180deg, #041109 0%, #020603 58%, #000000 100%);
 }
 
 button {
@@ -562,7 +586,7 @@ button:focus-visible {
 
 .segmented {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
     margin-top: 10px;
 }
@@ -750,7 +774,7 @@ button:focus-visible {
     }
 
     .segmented {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     #networkResults {
@@ -933,6 +957,7 @@ button:focus-visible {
                     <button id="themeDeep" class="settingsBtn" type="button" onclick="setTheme('deep')">Deep</button>
                     <button id="themeSlate" class="settingsBtn" type="button" onclick="setTheme('slate')">Slate</button>
                     <button id="themeContrast" class="settingsBtn" type="button" onclick="setTheme('contrast')">Contrast</button>
+                    <button id="themeMatrix" class="settingsBtn" type="button" onclick="setTheme('matrix')">Matrix</button>
                 </div>
             </section>
 
@@ -1019,7 +1044,8 @@ const defaultSettings = {
 const themeNames = {
     deep: "Deep",
     slate: "Slate",
-    contrast: "Contrast"
+    contrast: "Contrast",
+    matrix: "Matrix"
 };
 
 let settings = loadSettings();
@@ -1271,7 +1297,7 @@ function setTheme(theme) {
 }
 
 function applyTheme() {
-    document.body.classList.remove("theme-slate", "theme-contrast");
+    document.body.classList.remove("theme-slate", "theme-contrast", "theme-matrix");
 
     if (settings.theme !== "deep") {
         document.body.classList.add("theme-" + settings.theme);
@@ -1304,7 +1330,7 @@ function updateSettingsPage() {
     const sensitivity = settings.mouseSensitivity;
     const acceleration = settings.mouseAcceleration;
 
-    ["deep", "slate", "contrast"].forEach(function(name) {
+    ["deep", "slate", "contrast", "matrix"].forEach(function(name) {
         byId("theme" + name.charAt(0).toUpperCase() + name.slice(1)).classList.toggle("active", theme === name);
     });
 

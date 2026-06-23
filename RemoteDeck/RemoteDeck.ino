@@ -60,7 +60,7 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 const char *DEVICE_NAME = "RemoteDeck";
 const char *MDNS_NAME = "remotedeck";
-const char *FIRMWARE_VERSION = "1.0.4";
+const char *FIRMWARE_VERSION = "1.0.5";
 const char *BUILD_TARGET = "ESP32-S3 USB HID";
 const char *AP_PASSWORD = REMOTEDECK_AP_PASSWORD;
 const char *CONTROL_PIN = REMOTEDECK_CONTROL_PIN;
