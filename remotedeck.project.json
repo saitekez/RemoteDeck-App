@@ -40,7 +40,8 @@
       "mouse_move",
       "mouse_left",
       "mouse_right",
-      "mouse_scroll"
+      "mouse_scroll",
+      "settings"
     ],
     "toolActions": [
       "devicehealth",

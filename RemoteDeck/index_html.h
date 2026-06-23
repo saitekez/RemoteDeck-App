@@ -31,6 +31,33 @@ static const char PROGMEM INDEX_HTML[] = R"rawliteral(
     --keyboard-max: 780px;
 }
 
+body.theme-slate {
+    --bg: #0a0f12;
+    --panel: #172126;
+    --panel-strong: #263238;
+    --key: #27343a;
+    --key-active: #256b71;
+    --accent: #42d68b;
+    --accent-blue: #4cc9f0;
+    --border: #38464d;
+    --border-bright: #607079;
+    --muted: #b7c5ca;
+}
+
+body.theme-contrast {
+    --bg: #000000;
+    --panel: #111111;
+    --panel-strong: #222222;
+    --key: #303030;
+    --key-active: #0d7a42;
+    --accent: #6cff9a;
+    --accent-blue: #7cc7ff;
+    --border: #676767;
+    --border-bright: #8a8a8a;
+    --text: #ffffff;
+    --muted: #d5d5d5;
+}
+
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -56,6 +83,16 @@ body {
         env(safe-area-inset-bottom)
         env(safe-area-inset-left);
     overflow-x: hidden;
+}
+
+body.theme-slate {
+    background:
+        linear-gradient(180deg, #1e3137 0%, #0f171b 34%, #050708 100%);
+}
+
+body.theme-contrast {
+    background:
+        linear-gradient(180deg, #151515 0%, #050505 36%, #000000 100%);
 }
 
 button {
@@ -99,7 +136,7 @@ button:focus-visible {
 
 .topNav {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
 }
 
@@ -356,6 +393,11 @@ button:focus-visible {
     padding-bottom: 4px;
 }
 
+#settingsPage.active {
+    overflow-y: auto;
+    padding-bottom: 4px;
+}
+
 .actionBtn:active,
 .toolBtn:active,
 .kbKey.pressed {
@@ -484,6 +526,116 @@ button:focus-visible {
     overflow-wrap: anywhere;
 }
 
+.settingsGrid {
+    display: grid;
+    gap: 10px;
+}
+
+.settingPanel {
+    padding: 12px;
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.01)),
+        var(--panel);
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.settingHeader,
+.rangeHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.settingValue {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.segmented {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.settingsBtn {
+    min-height: 42px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.16)),
+        var(--key);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.settingsBtn.active {
+    border-color: var(--accent-blue);
+    color: var(--text);
+    background:
+        linear-gradient(180deg, rgba(88, 166, 255, 0.24), rgba(0, 0, 0, 0.10)),
+        var(--panel-strong);
+}
+
+.rangeControl {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.rangeControl input {
+    width: 100%;
+    accent-color: var(--accent-blue);
+}
+
+.toggleRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.toggleBtn {
+    min-width: 112px;
+    min-height: 42px;
+    padding: 0 12px;
+    border: 1px solid rgba(63, 185, 80, 0.62);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(63, 185, 80, 0.26), rgba(0, 0, 0, 0.10)),
+        var(--key);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.toggleBtn.off {
+    border-color: rgba(248, 81, 73, 0.72);
+    background:
+        linear-gradient(180deg, rgba(248, 81, 73, 0.22), rgba(0, 0, 0, 0.12)),
+        var(--key);
+}
+
+.settingStatus {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
 .toolInputPanel {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 88px;
@@ -593,6 +745,14 @@ button:focus-visible {
         grid-template-columns: 1fr;
     }
 
+    .toggleRow {
+        grid-template-columns: 1fr;
+    }
+
+    .segmented {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     #networkResults {
         min-height: 82px;
         max-height: 28svh;
@@ -628,7 +788,7 @@ button:focus-visible {
 
     .panelBtn {
         min-height: 38px;
-        font-size: 14px;
+        font-size: 13px;
     }
 
     #deckPage.active {
@@ -660,10 +820,11 @@ button:focus-visible {
     }
 
     .actionBtn,
-    .toolBtn {
+    .toolBtn,
+    .settingsBtn {
         min-height: 44px;
         padding: 7px;
-        font-size: 14px;
+        font-size: 13px;
     }
 
     .keyboard {
@@ -687,6 +848,7 @@ button:focus-visible {
 <div id="app">
     <nav class="topNav" aria-label="RemoteDeck pages">
         <button id="leftNav" class="panelBtn" type="button" onclick="navLeft()">Tools</button>
+        <button id="centerNav" class="panelBtn" type="button" onclick="navCenter()">Settings</button>
         <button id="rightNav" class="panelBtn" type="button" onclick="navRight()">Macros</button>
     </nav>
 
@@ -759,6 +921,54 @@ button:focus-visible {
     <section id="macrosPage" class="page">
         <div id="macroContent" class="macroGroup"></div>
     </section>
+
+    <section id="settingsPage" class="page">
+        <div class="settingsGrid">
+            <section class="settingPanel">
+                <div class="settingHeader">
+                    <span>Theme</span>
+                    <span id="themeValue" class="settingValue">Deep</span>
+                </div>
+                <div class="segmented" aria-label="Theme">
+                    <button id="themeDeep" class="settingsBtn" type="button" onclick="setTheme('deep')">Deep</button>
+                    <button id="themeSlate" class="settingsBtn" type="button" onclick="setTheme('slate')">Slate</button>
+                    <button id="themeContrast" class="settingsBtn" type="button" onclick="setTheme('contrast')">Contrast</button>
+                </div>
+            </section>
+
+            <section class="settingPanel">
+                <div class="settingHeader">
+                    <span>Pointer</span>
+                    <span id="pointerValue" class="settingValue">Balanced</span>
+                </div>
+                <label class="rangeControl">
+                    <span class="rangeHeader">
+                        <span>Sensitivity</span>
+                        <output id="mouseSensitivityValue">100%</output>
+                    </span>
+                    <input id="mouseSensitivityInput" type="range" min="40" max="180" step="5" value="100">
+                </label>
+                <label class="rangeControl">
+                    <span class="rangeHeader">
+                        <span>Acceleration</span>
+                        <output id="mouseAccelerationValue">65%</output>
+                    </span>
+                    <input id="mouseAccelerationInput" type="range" min="0" max="120" step="5" value="65">
+                </label>
+            </section>
+
+            <section class="settingPanel">
+                <div class="settingHeader">
+                    <span>HTTP Server</span>
+                    <span id="httpValue" class="settingValue">On</span>
+                </div>
+                <div class="toggleRow">
+                    <p id="httpSettingStatus" class="settingStatus">Local page loading is enabled.</p>
+                    <button id="httpToggleButton" class="toggleBtn" type="button" onclick="toggleHttpServer()">HTTP On</button>
+                </div>
+            </section>
+        </div>
+    </section>
 </div>
 
 <script>
@@ -798,6 +1008,21 @@ let activeProfile = "windows";
 let statusRestoreTimer = 0;
 let controlPinRequired = false;
 let controlPin = loadControlPin();
+let httpServerEnabled = true;
+
+const defaultSettings = {
+    theme: "deep",
+    mouseSensitivity: 100,
+    mouseAcceleration: 65
+};
+
+const themeNames = {
+    deep: "Deep",
+    slate: "Slate",
+    contrast: "Contrast"
+};
+
+let settings = loadSettings();
 
 const adminActions = new Set([
     "cmdadmin",
@@ -1007,6 +1232,125 @@ function saveControlPin() {
     flashStatus(controlPin ? "Unlocked" : "PIN Cleared");
 }
 
+function loadSettings() {
+    try {
+        const stored = JSON.parse(window.localStorage.getItem("remotedeckSettings") || "{}");
+        return {
+            theme: themeNames[stored.theme] ? stored.theme : defaultSettings.theme,
+            mouseSensitivity: clampNumber(stored.mouseSensitivity, 40, 180, defaultSettings.mouseSensitivity),
+            mouseAcceleration: clampNumber(stored.mouseAcceleration, 0, 120, defaultSettings.mouseAcceleration)
+        };
+    } catch (err) {
+        return Object.assign({}, defaultSettings);
+    }
+}
+
+function saveSettings() {
+    try {
+        window.localStorage.setItem("remotedeckSettings", JSON.stringify(settings));
+    } catch (err) {
+        return;
+    }
+}
+
+function clampNumber(value, min, max, fallback) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return fallback;
+    }
+
+    return Math.max(min, Math.min(max, number));
+}
+
+function setTheme(theme) {
+    settings.theme = themeNames[theme] ? theme : defaultSettings.theme;
+    saveSettings();
+    applyTheme();
+    updateSettingsPage();
+}
+
+function applyTheme() {
+    document.body.classList.remove("theme-slate", "theme-contrast");
+
+    if (settings.theme !== "deep") {
+        document.body.classList.add("theme-" + settings.theme);
+    }
+}
+
+function updatePointerSetting(name, value) {
+    settings[name] = name === "mouseSensitivity"
+        ? clampNumber(value, 40, 180, defaultSettings.mouseSensitivity)
+        : clampNumber(value, 0, 120, defaultSettings.mouseAcceleration);
+
+    saveSettings();
+    updateSettingsPage();
+}
+
+function pointerLabel() {
+    if (settings.mouseSensitivity >= 135 || settings.mouseAcceleration >= 95) {
+        return "Fast";
+    }
+
+    if (settings.mouseSensitivity <= 70 || settings.mouseAcceleration <= 25) {
+        return "Precise";
+    }
+
+    return "Balanced";
+}
+
+function updateSettingsPage() {
+    const theme = settings.theme;
+    const sensitivity = settings.mouseSensitivity;
+    const acceleration = settings.mouseAcceleration;
+
+    ["deep", "slate", "contrast"].forEach(function(name) {
+        byId("theme" + name.charAt(0).toUpperCase() + name.slice(1)).classList.toggle("active", theme === name);
+    });
+
+    byId("themeValue").textContent = themeNames[theme] || themeNames.deep;
+    byId("pointerValue").textContent = pointerLabel();
+    byId("mouseSensitivityInput").value = sensitivity;
+    byId("mouseSensitivityValue").textContent = sensitivity + "%";
+    byId("mouseAccelerationInput").value = acceleration;
+    byId("mouseAccelerationValue").textContent = acceleration + "%";
+    updateHttpSettingUi();
+}
+
+function updateHttpSettingUi(message) {
+    const value = byId("httpValue");
+    const status = byId("httpSettingStatus");
+    const button = byId("httpToggleButton");
+
+    if (!value || !status || !button) {
+        return;
+    }
+
+    value.textContent = httpServerEnabled ? "On" : "Off";
+    button.textContent = httpServerEnabled ? "HTTP On" : "HTTP Off";
+    button.classList.toggle("off", !httpServerEnabled);
+
+    status.textContent = message || (
+        httpServerEnabled
+            ? "Local page loading is enabled."
+            : "Current page can still restore it. Reboot also turns it back on."
+    );
+}
+
+function toggleHttpServer() {
+    const nextEnabled = !httpServerEnabled;
+
+    if (!sendMessage({
+        event: "settings",
+        httpEnabled: nextEnabled
+    })) {
+        updateHttpSettingUi("Connect to RemoteDeck first.");
+        return;
+    }
+
+    updateHttpSettingUi(nextEnabled ? "Turning HTTP on..." : "Turning HTTP off...");
+}
+
 function savedProfile() {
     try {
         return window.localStorage.getItem("remotedeckProfile");
@@ -1190,19 +1534,24 @@ function flashStatus(text) {
 
 function updateNav() {
     const left = byId("leftNav");
+    const center = byId("centerNav");
     const right = byId("rightNav");
 
     if (currentPage === "deck") {
         left.textContent = "Tools";
+        center.textContent = "Settings";
         right.textContent = "Macros";
         left.classList.remove("active");
+        center.classList.remove("active");
         right.classList.remove("active");
         return;
     }
 
     left.textContent = "Back";
+    center.textContent = "Settings";
     right.textContent = "Home";
-    left.classList.add("active");
+    left.classList.toggle("active", currentPage !== "settings");
+    center.classList.toggle("active", currentPage === "settings");
     right.classList.add("active");
 }
 
@@ -1224,11 +1573,15 @@ function navRight() {
     showPage("deck");
 }
 
+function navCenter() {
+    showPage(currentPage === "settings" ? "deck" : "settings");
+}
+
 function showPage(pageName) {
     previousPage = currentPage;
     currentPage = pageName;
 
-    ["deck", "tools", "macros"].forEach(function(name) {
+    ["deck", "tools", "macros", "settings"].forEach(function(name) {
         byId(name + "Page").classList.toggle("active", name === pageName);
     });
 
@@ -1559,7 +1912,12 @@ function setupTouchpad() {
         }
 
         if (distance > 0) {
-            const speed = Math.min(6 + distance * 0.65, 28);
+            const sensitivity = settings.mouseSensitivity / 100;
+            const acceleration = settings.mouseAcceleration / 100;
+            const speed = Math.max(
+                1,
+                Math.min(36, (6 + distance * acceleration) * sensitivity)
+            );
             sendMessage({
                 event: "mouse_move",
                 dx: Math.round(dx * speed),
@@ -1736,11 +2094,23 @@ function handleMessage(data) {
 
     if (data.action === "status") {
         controlPinRequired = !!data.controlPinRequired;
+        httpServerEnabled = data.httpServerEnabled !== false;
         updateSecurityBar();
+        updateHttpSettingUi();
 
         if (data.version) {
             setStatus("Connected v" + data.version, "online");
         }
+        return;
+    }
+
+    if (data.action === "settings") {
+        if (data.httpEnabled !== undefined) {
+            httpServerEnabled = !!data.httpEnabled;
+        }
+
+        updateHttpSettingUi(data.message);
+        flashStatus(data.message || "Settings Updated");
         return;
     }
 
@@ -1801,17 +2171,30 @@ function setupSecurityInput() {
     });
 }
 
+function setupSettingsControls() {
+    byId("mouseSensitivityInput").addEventListener("input", function(e) {
+        updatePointerSetting("mouseSensitivity", e.target.value);
+    });
+
+    byId("mouseAccelerationInput").addEventListener("input", function(e) {
+        updatePointerSetting("mouseAcceleration", e.target.value);
+    });
+}
+
 function start() {
+    applyTheme();
     activeProfile = initialProfile();
     updateProfileButtons();
     renderQuickGrid();
     renderMacros();
     updateNav();
+    updateSettingsPage();
     updateSecurityBar();
     createKeyboard();
     setupTouchpad();
     setupToolInputs();
     setupSecurityInput();
+    setupSettingsControls();
     connectSocket();
 }
 

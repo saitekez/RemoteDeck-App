@@ -60,7 +60,7 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 const char *DEVICE_NAME = "RemoteDeck";
 const char *MDNS_NAME = "remotedeck";
-const char *FIRMWARE_VERSION = "1.0.3";
+const char *FIRMWARE_VERSION = "1.0.4";
 const char *BUILD_TARGET = "ESP32-S3 USB HID";
 const char *AP_PASSWORD = REMOTEDECK_AP_PASSWORD;
 const char *CONTROL_PIN = REMOTEDECK_CONTROL_PIN;
@@ -86,6 +86,7 @@ const uint8_t Keycodes[MAX_ROWS][MAX_COLS] = {
 
 unsigned long lastWifiHealthCheck = 0;
 uint8_t apRecoveryAttempts = 0;
+bool httpServerEnabled = true;
 
 bool apPasswordEnabled()
 {
@@ -226,6 +227,30 @@ void sendError(uint8_t client, const char *action, const char *message)
   JsonDocument response;
   response["action"] = action;
   response["error"] = message;
+  sendJson(client, response);
+}
+
+void setHttpServerEnabled(bool enabled)
+{
+  if (enabled == httpServerEnabled) {
+    return;
+  }
+
+  if (enabled) {
+    server.begin();
+  } else {
+    server.stop();
+  }
+
+  httpServerEnabled = enabled;
+}
+
+void sendSettingsStatus(uint8_t client, const char *message)
+{
+  JsonDocument response;
+  response["action"] = "settings";
+  response["httpEnabled"] = httpServerEnabled;
+  response["message"] = message;
   sendJson(client, response);
 }
 
@@ -687,6 +712,7 @@ void populateDeviceStatus(JsonDocument &doc)
   doc["mdns"] = MDNS_NAME;
   doc["apProtected"] = apPasswordEnabled();
   doc["controlPinRequired"] = controlPinRequired();
+  doc["httpServerEnabled"] = httpServerEnabled;
   doc["uptimeMs"] = millis();
   doc["stationConnected"] = WiFi.status() == WL_CONNECTED;
   doc["ssid"] = WiFi.SSID();
@@ -1230,6 +1256,21 @@ bool handleLegacyGridEvent(const char *event, JsonDocument &doc)
   return true;
 }
 
+void handleSettingsEvent(uint8_t client, JsonDocument &doc)
+{
+  if (!doc["httpEnabled"].is<bool>()) {
+    sendSettingsStatus(client, "No setting changed.");
+    return;
+  }
+
+  bool enabled = doc["httpEnabled"];
+  setHttpServerEnabled(enabled);
+  sendSettingsStatus(
+    client,
+    enabled ? "HTTP server enabled." : "HTTP server disabled until restored or rebooted."
+  );
+}
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 {
   DBG_printf("webSocketEvent(%d, %d, ...)\r\n", num, type);
@@ -1269,6 +1310,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 
         if (!controlPinMatches(doc)) {
           sendError(num, action[0] ? action : event, "Unlock RemoteDeck before sending controls.");
+          return;
+        }
+
+        if (strcmp(event, "settings") == 0) {
+          handleSettingsEvent(num, doc);
           return;
         }
 
@@ -1424,5 +1470,8 @@ void loop()
   maintainWifi();
   dnsServer.processNextRequest();
   webSocket.loop();
-  server.handleClient();
+
+  if (httpServerEnabled) {
+    server.handleClient();
+  }
 }
