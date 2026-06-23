@@ -612,6 +612,14 @@ button:focus-visible {
         var(--panel-strong);
 }
 
+.settingsBtn.dangerBtn {
+    border-color: rgba(248, 81, 73, 0.72);
+    color: #ffd0cd;
+    background:
+        linear-gradient(180deg, rgba(248, 81, 73, 0.18), rgba(0, 0, 0, 0.12)),
+        var(--key);
+}
+
 .rangeControl {
     display: grid;
     gap: 8px;
@@ -980,6 +988,31 @@ button:focus-visible {
                     </span>
                     <input id="mouseAccelerationInput" type="range" min="0" max="120" step="5" value="65">
                 </label>
+                <div class="toggleRow">
+                    <p class="settingStatus">Single tap on the touchpad sends a left click.</p>
+                    <button id="tapToClickButton" class="toggleBtn" type="button" onclick="toggleBooleanSetting('tapToClick')">Tap On</button>
+                </div>
+                <div class="toggleRow">
+                    <p class="settingStatus">Two-finger scroll follows touch direction when enabled.</p>
+                    <button id="naturalScrollButton" class="toggleBtn off" type="button" onclick="toggleBooleanSetting('naturalScroll')">Natural Off</button>
+                </div>
+            </section>
+
+            <section class="settingPanel">
+                <div class="settingHeader">
+                    <span>Startup</span>
+                    <span id="startupValue" class="settingValue">Deck</span>
+                </div>
+                <div class="segmented" aria-label="Startup page">
+                    <button id="startupDeck" class="settingsBtn" type="button" onclick="setStartupPage('deck')">Deck</button>
+                    <button id="startupTools" class="settingsBtn" type="button" onclick="setStartupPage('tools')">Tools</button>
+                    <button id="startupMacros" class="settingsBtn" type="button" onclick="setStartupPage('macros')">Macros</button>
+                    <button id="startupSettings" class="settingsBtn" type="button" onclick="setStartupPage('settings')">Settings</button>
+                </div>
+                <div class="toggleRow">
+                    <p class="settingStatus">Ask before sending administrator-level macros.</p>
+                    <button id="adminConfirmButton" class="toggleBtn" type="button" onclick="toggleBooleanSetting('confirmAdmin')">Confirm On</button>
+                </div>
             </section>
 
             <section class="settingPanel">
@@ -990,6 +1023,17 @@ button:focus-visible {
                 <div class="toggleRow">
                     <p id="httpSettingStatus" class="settingStatus">Local page loading is enabled.</p>
                     <button id="httpToggleButton" class="toggleBtn" type="button" onclick="toggleHttpServer()">HTTP On</button>
+                </div>
+            </section>
+
+            <section class="settingPanel">
+                <div class="settingHeader">
+                    <span>Reset</span>
+                    <span id="resetValue" class="settingValue">Local</span>
+                </div>
+                <div class="toggleRow">
+                    <p class="settingStatus">Restore theme, pointer, startup, and safety settings for this browser.</p>
+                    <button class="settingsBtn dangerBtn" type="button" onclick="resetSettings()">Reset Settings</button>
                 </div>
             </section>
         </div>
@@ -1038,7 +1082,11 @@ let httpServerEnabled = true;
 const defaultSettings = {
     theme: "deep",
     mouseSensitivity: 100,
-    mouseAcceleration: 65
+    mouseAcceleration: 65,
+    tapToClick: true,
+    naturalScroll: false,
+    startupPage: "deck",
+    confirmAdmin: true
 };
 
 const themeNames = {
@@ -1264,7 +1312,11 @@ function loadSettings() {
         return {
             theme: themeNames[stored.theme] ? stored.theme : defaultSettings.theme,
             mouseSensitivity: clampNumber(stored.mouseSensitivity, 40, 180, defaultSettings.mouseSensitivity),
-            mouseAcceleration: clampNumber(stored.mouseAcceleration, 0, 120, defaultSettings.mouseAcceleration)
+            mouseAcceleration: clampNumber(stored.mouseAcceleration, 0, 120, defaultSettings.mouseAcceleration),
+            tapToClick: stored.tapToClick !== false,
+            naturalScroll: stored.naturalScroll === true,
+            startupPage: normalizePageName(stored.startupPage || defaultSettings.startupPage),
+            confirmAdmin: stored.confirmAdmin !== false
         };
     } catch (err) {
         return Object.assign({}, defaultSettings);
@@ -1313,6 +1365,53 @@ function updatePointerSetting(name, value) {
     updateSettingsPage();
 }
 
+function toggleBooleanSetting(name) {
+    if (typeof settings[name] !== "boolean") {
+        return;
+    }
+
+    settings[name] = !settings[name];
+    saveSettings();
+    updateSettingsPage();
+    flashStatus(settings[name] ? "Setting On" : "Setting Off");
+}
+
+function resetSettings() {
+    if (!window.confirm("Reset RemoteDeck settings on this browser?")) {
+        return;
+    }
+
+    settings = Object.assign({}, defaultSettings);
+    saveSettings();
+    applyTheme();
+    updateSettingsPage();
+    flashStatus("Settings Reset");
+}
+
+function setStartupPage(pageName) {
+    settings.startupPage = normalizePageName(pageName);
+    saveSettings();
+    updateSettingsPage();
+    flashStatus("Startup: " + pageLabel(settings.startupPage));
+}
+
+function pageLabel(pageName) {
+    const labels = {
+        deck: "Deck",
+        tools: "Tools",
+        macros: "Macros",
+        settings: "Settings"
+    };
+
+    return labels[pageName] || labels.deck;
+}
+
+function normalizePageName(pageName) {
+    return ["deck", "tools", "macros", "settings"].indexOf(pageName) >= 0
+        ? pageName
+        : "deck";
+}
+
 function pointerLabel() {
     if (settings.mouseSensitivity >= 135 || settings.mouseAcceleration >= 95) {
         return "Fast";
@@ -1329,18 +1428,38 @@ function updateSettingsPage() {
     const theme = settings.theme;
     const sensitivity = settings.mouseSensitivity;
     const acceleration = settings.mouseAcceleration;
+    const startupPage = normalizePageName(settings.startupPage);
 
     ["deep", "slate", "contrast", "matrix"].forEach(function(name) {
         byId("theme" + name.charAt(0).toUpperCase() + name.slice(1)).classList.toggle("active", theme === name);
     });
 
+    ["deck", "tools", "macros", "settings"].forEach(function(name) {
+        byId("startup" + name.charAt(0).toUpperCase() + name.slice(1)).classList.toggle("active", startupPage === name);
+    });
+
     byId("themeValue").textContent = themeNames[theme] || themeNames.deep;
     byId("pointerValue").textContent = pointerLabel();
+    byId("startupValue").textContent = pageLabel(startupPage);
     byId("mouseSensitivityInput").value = sensitivity;
     byId("mouseSensitivityValue").textContent = sensitivity + "%";
     byId("mouseAccelerationInput").value = acceleration;
     byId("mouseAccelerationValue").textContent = acceleration + "%";
+    updateToggleButton("tapToClickButton", settings.tapToClick, "Tap On", "Tap Off");
+    updateToggleButton("naturalScrollButton", settings.naturalScroll, "Natural On", "Natural Off");
+    updateToggleButton("adminConfirmButton", settings.confirmAdmin, "Confirm On", "Confirm Off");
     updateHttpSettingUi();
+}
+
+function updateToggleButton(id, enabled, onText, offText) {
+    const button = byId(id);
+
+    if (!button) {
+        return;
+    }
+
+    button.textContent = enabled ? onText : offText;
+    button.classList.toggle("off", !enabled);
 }
 
 function updateHttpSettingUi(message) {
@@ -1445,6 +1564,10 @@ function createActionButton(label, action) {
         btn.title = "Requires administrator approval on the connected PC.";
     }
     btn.addEventListener("click", function() {
+        if (!confirmShortcutSend(label, action)) {
+            return;
+        }
+
         if (sendShortcut(action)) {
             flashStatus(
                 adminActions.has(action)
@@ -1454,6 +1577,14 @@ function createActionButton(label, action) {
         }
     });
     return btn;
+}
+
+function confirmShortcutSend(label, action) {
+    if (!settings.confirmAdmin || !adminActions.has(action)) {
+        return true;
+    }
+
+    return window.confirm("Send admin macro: " + label + "?");
 }
 
 function renderQuickGrid() {
@@ -1604,11 +1735,23 @@ function navCenter() {
 }
 
 function showPage(pageName) {
+    pageName = normalizePageName(pageName);
     previousPage = currentPage;
     currentPage = pageName;
 
     ["deck", "tools", "macros", "settings"].forEach(function(name) {
         byId(name + "Page").classList.toggle("active", name === pageName);
+    });
+
+    updateNav();
+}
+
+function applyStartupPage() {
+    currentPage = normalizePageName(settings.startupPage);
+    previousPage = "deck";
+
+    ["deck", "tools", "macros", "settings"].forEach(function(name) {
+        byId(name + "Page").classList.toggle("active", name === currentPage);
     });
 
     updateNav();
@@ -1882,7 +2025,7 @@ function setupTouchpad() {
 
             if (wheel !== 0) {
                 twoFingerMoved = true;
-                sendScroll(wheel);
+                sendScroll(settings.naturalScroll ? -wheel : wheel);
                 lastTouchY = y;
             }
         }
@@ -1962,7 +2105,7 @@ function setupTouchpad() {
             return;
         }
 
-        if (!moved) {
+        if (!moved && settings.tapToClick) {
             sendMouseClick("mouse_left");
         }
 
@@ -2213,7 +2356,7 @@ function start() {
     updateProfileButtons();
     renderQuickGrid();
     renderMacros();
-    updateNav();
+    applyStartupPage();
     updateSettingsPage();
     updateSecurityBar();
     createKeyboard();

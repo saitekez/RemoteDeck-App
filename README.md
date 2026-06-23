@@ -19,7 +19,7 @@ The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser 
 - Supports Windows, Linux/server, and macOS profiles.
 - Provides iPhone-style keyboard modes for letters, numbers, symbols, shift, and caps lock.
 - Supports touchpad movement, tap-to-click, two-finger right click, and two-finger scroll.
-- Includes an in-app Settings page for Deep, Slate, Contrast, and Matrix themes, pointer sensitivity, pointer acceleration, and temporary HTTP lock.
+- Includes an in-app Settings page for themes, pointer tuning, tap-to-click, natural scroll, startup page, admin macro confirmation, reset, and temporary HTTP lock.
 - Includes IT-focused macros for common admin panels, shells, diagnostics, and repair commands.
 - Includes tools for device health, IP info, public IP, network snapshot, ticket info, system specs launcher, DNS lookup, port check, and Wake-on-LAN.
 - Includes captive portal behavior so phones and tablets can open the RemoteDeck page after joining WiFi.
