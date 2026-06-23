@@ -16,11 +16,12 @@ The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser 
 - Creates a password-protected `RemoteDeck` WiFi access point and serves the control UI locally.
 - Provides a combined touchpad and responsive mobile keyboard screen.
 - Includes eight fast IT shortcuts below the touchpad.
-- Supports Windows, Linux/server, and macOS profiles.
+- Supports Windows, Linux/server, macOS, and Android TV profiles.
 - Provides iPhone-style keyboard modes for letters, numbers, symbols, shift, and caps lock.
 - Supports touchpad movement, tap-to-click, two-finger right click, and two-finger scroll.
 - Includes an in-app Settings page for themes, pointer tuning, tap-to-click, natural scroll, startup page, admin macro confirmation, reset, and temporary HTTP lock.
 - Includes IT-focused macros for common admin panels, shells, diagnostics, and repair commands.
+- Includes an Android TV remote profile with D-pad, OK, Back, Home, Search, media, volume, and mute actions over USB HID.
 - Includes tools for device health, IP info, public IP, network snapshot, ticket info, system specs launcher, DNS lookup, port check, and Wake-on-LAN.
 - Includes captive portal behavior so phones and tablets can open the RemoteDeck page after joining WiFi.
 - Performs WiFi/AP health checks and attempts to recover the access point if it drops.
@@ -135,7 +136,9 @@ It types a command that shows machine name, OS/version, CPU, and memory on the c
 
 Windows troubleshooting macros use PowerShell for read-only diagnostics and elevated CMD for repair actions such as SFC, DISM, DNS flush, Winsock reset, and GPUpdate. Windows will still show UAC on the connected PC; approve it there before the elevated command runs.
 
-RemoteDeck cannot directly detect the OS of the USB-connected host over HID. The profile auto-default is based on the browser device. Once you manually pick Windows, Linux, or macOS, that choice is saved in the browser and reused.
+RemoteDeck cannot directly detect the OS of the USB-connected host over HID. The profile auto-default is based on the browser device. Once you manually pick Windows, Linux, macOS, or Android TV, that choice is saved in the browser and reused.
+
+The Android TV profile is intended for USB HID control. Plug the ESP32-S3 into the Android TV, streaming box, or Android device USB port, then use a phone/tablet browser on the RemoteDeck WiFi page as the remote. It does not use Android TV's WiFi pairing protocol.
 
 ## Health Endpoints
 

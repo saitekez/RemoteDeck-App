@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <USB.h>
+#include <USBHIDConsumerControl.h>
 #include <USBHIDKeyboard.h>
 #include <USBHIDMouse.h>
 #include <WiFi.h>
@@ -50,6 +51,7 @@
 
 USBHIDKeyboard Keyboard;
 USBHIDMouse Mouse;
+USBHIDConsumerControl ConsumerControl;
 WiFiUDP Udp;
 DNSServer dnsServer;
 
@@ -60,7 +62,7 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 const char *DEVICE_NAME = "RemoteDeck";
 const char *MDNS_NAME = "remotedeck";
-const char *FIRMWARE_VERSION = "1.0.6";
+const char *FIRMWARE_VERSION = "1.0.7";
 const char *BUILD_TARGET = "ESP32-S3 USB HID";
 const char *AP_PASSWORD = REMOTEDECK_AP_PASSWORD;
 const char *CONTROL_PIN = REMOTEDECK_CONTROL_PIN;
@@ -270,6 +272,13 @@ void tapShortcut(uint8_t first, uint8_t second = 0, uint8_t third = 0, uint16_t 
   Keyboard.releaseAll();
 }
 
+void tapConsumer(uint16_t key, uint16_t holdMs = 40)
+{
+  ConsumerControl.press(key);
+  delay(holdMs);
+  ConsumerControl.release();
+}
+
 void openRunBox()
 {
   tapShortcut(KEY_LEFT_GUI, 'r', 0, 60);
@@ -321,6 +330,10 @@ const char *normalizeProfile(const char *profile)
 
   if (profile != nullptr && strcmp(profile, "macos") == 0) {
     return "macos";
+  }
+
+  if (profile != nullptr && strcmp(profile, "androidtv") == 0) {
+    return "androidtv";
   }
 
   return "windows";
@@ -399,6 +412,81 @@ void runProfileCommand(const char *profile, const char *windowsCommand, const ch
 bool handleShortcut(const char *action, const char *profile)
 {
   profile = normalizeProfile(profile);
+
+  if (strcmp(action, "tvup") == 0) {
+    Keyboard.write(KEY_UP_ARROW);
+    return true;
+  }
+
+  if (strcmp(action, "tvdown") == 0) {
+    Keyboard.write(KEY_DOWN_ARROW);
+    return true;
+  }
+
+  if (strcmp(action, "tvleft") == 0) {
+    Keyboard.write(KEY_LEFT_ARROW);
+    return true;
+  }
+
+  if (strcmp(action, "tvright") == 0) {
+    Keyboard.write(KEY_RIGHT_ARROW);
+    return true;
+  }
+
+  if (strcmp(action, "tvselect") == 0) {
+    Keyboard.write(KEY_RETURN);
+    return true;
+  }
+
+  if (strcmp(action, "tvback") == 0) {
+    tapConsumer(CONSUMER_CONTROL_BACK);
+    return true;
+  }
+
+  if (strcmp(action, "tvhome") == 0) {
+    tapConsumer(CONSUMER_CONTROL_HOME);
+    return true;
+  }
+
+  if (strcmp(action, "tvmenu") == 0 || strcmp(action, "tvsettings") == 0) {
+    tapConsumer(CONSUMER_CONTROL_CONFIGURATION);
+    return true;
+  }
+
+  if (strcmp(action, "tvsearch") == 0) {
+    tapConsumer(CONSUMER_CONTROL_SEARCH);
+    return true;
+  }
+
+  if (strcmp(action, "tvplay") == 0) {
+    tapConsumer(CONSUMER_CONTROL_PLAY_PAUSE);
+    return true;
+  }
+
+  if (strcmp(action, "tvnext") == 0) {
+    tapConsumer(CONSUMER_CONTROL_SCAN_NEXT);
+    return true;
+  }
+
+  if (strcmp(action, "tvprev") == 0) {
+    tapConsumer(CONSUMER_CONTROL_SCAN_PREVIOUS);
+    return true;
+  }
+
+  if (strcmp(action, "tvvolup") == 0) {
+    tapConsumer(CONSUMER_CONTROL_VOLUME_INCREMENT);
+    return true;
+  }
+
+  if (strcmp(action, "tvvoldown") == 0) {
+    tapConsumer(CONSUMER_CONTROL_VOLUME_DECREMENT);
+    return true;
+  }
+
+  if (strcmp(action, "tvmute") == 0) {
+    tapConsumer(CONSUMER_CONTROL_MUTE);
+    return true;
+  }
 
   if (strcmp(action, "run") == 0) {
     if (profileIs(profile, "windows")) {
@@ -916,6 +1004,11 @@ void sendPcSpecs(uint8_t client, const char *profile)
     return;
   }
 
+  if (profileIs(profile, "androidtv")) {
+    sendToolOutput(client, "pcspecs", "Android TV profile uses USB HID remote control only.\nSystem Specs would need an Android companion app or ADB/debug channel.");
+    return;
+  }
+
   const char *command = "$cs=Get-CimInstance Win32_ComputerSystem;$os=Get-CimInstance Win32_OperatingSystem;$cpu=Get-CimInstance Win32_Processor|Select-Object -First 1;[pscustomobject]@{PC=$env:COMPUTERNAME;OS=$os.Caption;Version=$os.Version;Build=$os.BuildNumber;CPU=$cpu.Name;MemoryGB=[math]::Round($cs.TotalPhysicalMemory/1GB,1)}|Format-List";
 
   openPowerShellCommand(command);
@@ -1409,6 +1502,7 @@ void setup()
   USB.usbProtocol(0);
   Keyboard.begin();
   Mouse.begin();
+  ConsumerControl.begin();
   USB.begin();
 
   if (!ensureRemoteDeckAccessPoint()) {

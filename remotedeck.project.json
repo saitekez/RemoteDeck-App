@@ -28,7 +28,8 @@
     "profiles": [
       "windows",
       "linux",
-      "macos"
+      "macos",
+      "androidtv"
     ]
   },
   "webSocketContract": {
@@ -124,6 +125,24 @@
         "processes",
         "ping8",
         "dnscheck"
+      ],
+      "androidtv": [
+        "tvup",
+        "tvdown",
+        "tvleft",
+        "tvright",
+        "tvselect",
+        "tvback",
+        "tvhome",
+        "tvmenu",
+        "tvsettings",
+        "tvsearch",
+        "tvplay",
+        "tvnext",
+        "tvprev",
+        "tvvolup",
+        "tvvoldown",
+        "tvmute"
       ]
     }
   },

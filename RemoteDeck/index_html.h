@@ -254,7 +254,7 @@ button:focus-visible {
 
 .profileBar {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
 }
 
@@ -897,6 +897,7 @@ button:focus-visible {
         <button id="profileWindows" class="profileBtn active" type="button" onclick="setProfile('windows')">Windows</button>
         <button id="profileLinux" class="profileBtn" type="button" onclick="setProfile('linux')">Linux</button>
         <button id="profileMacos" class="profileBtn" type="button" onclick="setProfile('macos')">macOS</button>
+        <button id="profileAndroidTv" class="profileBtn" type="button" onclick="setProfile('androidtv')">Android</button>
     </div>
 
     <main id="deckPage" class="page active">
@@ -1249,6 +1250,47 @@ const profileConfig = {
                     ["Processes", "processes"],
                     ["Ping 8.8.8.8", "ping8"],
                     ["DNS Test", "dnscheck"]
+                ]
+            }
+        ]
+    },
+    androidtv: {
+        buttonId: "profileAndroidTv",
+        quick: [
+            ["Up", "tvup"],
+            ["Left", "tvleft"],
+            ["OK", "tvselect"],
+            ["Right", "tvright"],
+            ["Down", "tvdown"],
+            ["Back", "tvback"],
+            ["Home", "tvhome"],
+            ["Play", "tvplay"]
+        ],
+        groups: [
+            {
+                title: "Android TV Remote",
+                actions: [
+                    ["Up", "tvup"],
+                    ["Left", "tvleft"],
+                    ["OK", "tvselect"],
+                    ["Right", "tvright"],
+                    ["Down", "tvdown"],
+                    ["Back", "tvback"],
+                    ["Home", "tvhome"],
+                    ["Menu", "tvmenu"]
+                ]
+            },
+            {
+                title: "Media And Search",
+                actions: [
+                    ["Search", "tvsearch"],
+                    ["Play/Pause", "tvplay"],
+                    ["Previous", "tvprev"],
+                    ["Next", "tvnext"],
+                    ["Volume Down", "tvvoldown"],
+                    ["Volume Up", "tvvolup"],
+                    ["Mute", "tvmute"],
+                    ["Settings", "tvsettings"]
                 ]
             }
         ]
