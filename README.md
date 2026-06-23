@@ -4,11 +4,13 @@ RemoteDeck turns an ESP32-S3 dev board into a browser-controlled USB HID keyboar
 
 The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser connects to that page, sends actions over WebSocket, and the ESP32 forwards them to the USB-connected host as keyboard and mouse input.
 
-![RemoteDeck workflow overview](./images/remotedeck-how-it-works.png)
+![RemoteDeck WiFi access point](./images/1AccessPoint.jpg)
 
-![System Block Diagram](./images/remotedeck-system-diagram.gif)
+![RemoteDeck home screen](./images/2Home.jpg)
 
-[Keyboard screen capture](./images/remotedeck-keyboard-screen.gif)
+![RemoteDeck tools screen](./images/3Tools.jpg)
+
+![RemoteDeck macros screen](./images/4Macros.jpg)
 
 ## What It Does
 
@@ -32,6 +34,8 @@ Primary target:
 
 - ESP32-S3 dev board with native USB support.
 - Known-good target: Adafruit QT Py ESP32-S3 WiFi Dev Board with STEMMA QT, 8 MB flash, no PSRAM.
+
+![ESP32-S3 Super Mini connected to USB adapter](./images/ESP32S3%20Super%20Mini.jpg)
 
 Recommended Arduino board target:
 
