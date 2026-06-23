@@ -1,0 +1,153 @@
+{
+  "schema": "remotedeck.project.v1",
+  "name": "RemoteDeck",
+  "description": "ESP32-S3 USB HID keyboard, mouse, tools, macros, and cross-OS field IT deck.",
+  "device": {
+    "family": "esp32-s3",
+    "recommendedBoard": "esp32:esp32:adafruit_qtpy_esp32s3_nopsram",
+    "requiresNativeUsb": true,
+    "wifiAccessPoint": "RemoteDeck",
+    "mdnsName": "remotedeck",
+    "httpPort": 80,
+    "webSocketPort": 81,
+    "captiveDnsPort": 53
+  },
+  "firmware": {
+    "entry": "usbkwa.ino",
+    "embeddedUi": "index_html.h",
+    "framework": "arduino",
+    "libraries": [
+      "WebSockets",
+      "ArduinoJson",
+      "WiFiManager"
+    ]
+  },
+  "ui": {
+    "type": "embedded-html-header",
+    "source": "index_html.h",
+    "profiles": [
+      "windows",
+      "linux",
+      "macos"
+    ]
+  },
+  "webSocketContract": {
+    "clientEvents": [
+      "touch start",
+      "touch end",
+      "shortcut",
+      "tool",
+      "mouse_move",
+      "mouse_left",
+      "mouse_right",
+      "mouse_scroll"
+    ],
+    "toolActions": [
+      "devicehealth",
+      "ipinfo",
+      "publicip",
+      "networkscan",
+      "ticketinfo",
+      "pcspecs",
+      "dnslookup",
+      "portcheck",
+      "wol"
+    ],
+    "shortcutProfiles": {
+      "windows": [
+        "run",
+        "copy",
+        "paste",
+        "selectall",
+        "cad",
+        "winx",
+        "lock",
+        "taskmgr",
+        "cmd",
+        "cmdadmin",
+        "powershell",
+        "powershelladmin",
+        "devmgmt",
+        "services",
+        "eventvwr",
+        "ncpa",
+        "sysinfo",
+        "netinfo",
+        "routes",
+        "dnscheck",
+        "logs",
+        "diskinfo",
+        "memoryinfo",
+        "cpuinfo",
+        "uptimeinfo",
+        "processes",
+        "sfcscan",
+        "dismrepair",
+        "flushdns",
+        "winsockreset",
+        "gpupdate",
+        "ping8"
+      ],
+      "linux": [
+        "terminal",
+        "sysinfo",
+        "netinfo",
+        "routes",
+        "diskinfo",
+        "memoryinfo",
+        "cpuinfo",
+        "uptimeinfo",
+        "processes",
+        "services",
+        "logs",
+        "dmesg",
+        "ping8",
+        "dnscheck"
+      ],
+      "macos": [
+        "spotlight",
+        "terminal",
+        "activity",
+        "forcequit",
+        "lock",
+        "copy",
+        "paste",
+        "selectall",
+        "sysinfo",
+        "netinfo",
+        "routes",
+        "diskinfo",
+        "memoryinfo",
+        "cpuinfo",
+        "uptimeinfo",
+        "processes",
+        "ping8",
+        "dnscheck"
+      ]
+    }
+  },
+  "docs": {
+    "readme": "README.md",
+    "studioHandoff": "REMOTEDECK_STUDIO_HANDOFF.md"
+  },
+  "studioImport": {
+    "schemaFile": "remotedeck.project.schema.json",
+    "validator": "tools/validate-remotedeck-project.js",
+    "spec": "REMOTEDECK_STUDIO_IMPORT_SPEC.md",
+    "launcher": {
+      "windowsCommand": "Launch RemoteDeck Studio.cmd",
+      "windowsScript": "tools/launch-remotedeck-studio.ps1",
+      "shortcutInstaller": "tools/install-remotedeck-studio-shortcut.ps1",
+      "icon": "images/remotedeck-studio.ico"
+    },
+    "rollback": {
+      "strategy": "transactional-workspace",
+      "recordImportReceipt": true,
+      "snapshotBeforeUpdate": true,
+      "safeRemoval": "studio-workspace-only",
+      "archiveBeforeDelete": true,
+      "retainSnapshots": 5
+    },
+    "testFixture": true
+  }
+}

@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://remotedeck.local/schemas/remotedeck.project.v1.json",
+  "title": "RemoteDeck Studio Project",
+  "type": "object",
+  "required": [
+    "schema",
+    "name",
+    "description",
+    "device",
+    "firmware",
+    "ui",
+    "webSocketContract",
+    "docs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "remotedeck.project.v1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "device": {
+      "type": "object",
+      "required": [
+        "family",
+        "recommendedBoard",
+        "requiresNativeUsb",
+        "wifiAccessPoint",
+        "mdnsName",
+        "httpPort",
+        "webSocketPort",
+        "captiveDnsPort"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "type": "string",
+          "enum": [
+            "esp32-s2",
+            "esp32-s3"
+          ]
+        },
+        "recommendedBoard": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requiresNativeUsb": {
+          "type": "boolean"
+        },
+        "wifiAccessPoint": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "mdnsName": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "httpPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "webSocketPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "captiveDnsPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "firmware": {
+      "type": "object",
+      "required": [
+        "entry",
+        "embeddedUi",
+        "framework",
+        "libraries"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "entry": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "embeddedUi": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "framework": {
+          "type": "string",
+          "enum": [
+            "arduino"
+          ]
+        },
+        "libraries": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "required": [
+        "type",
+        "source",
+        "profiles"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "embedded-html-header"
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "profiles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        }
+      }
+    },
+    "webSocketContract": {
+      "type": "object",
+      "required": [
+        "clientEvents",
+        "toolActions",
+        "shortcutProfiles"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "clientEvents": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "toolActions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        },
+        "shortcutProfiles": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$"
+            }
+          }
+        }
+      }
+    },
+    "docs": {
+      "type": "object",
+      "required": [
+        "readme",
+        "studioHandoff"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "readme": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "studioHandoff": {
+          "$ref": "#/$defs/relativePath"
+        }
+      }
+    },
+    "studioImport": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaFile": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "validator": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "spec": {
+          "$ref": "#/$defs/relativePath"
+        },
+        "rollback": {
+          "type": "object",
+          "required": [
+            "strategy",
+            "recordImportReceipt",
+            "snapshotBeforeUpdate",
+            "safeRemoval",
+            "archiveBeforeDelete",
+            "retainSnapshots"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "strategy": {
+              "type": "string",
+              "enum": [
+                "transactional-workspace"
+              ]
+            },
+            "recordImportReceipt": {
+              "type": "boolean"
+            },
+            "snapshotBeforeUpdate": {
+              "type": "boolean"
+            },
+            "safeRemoval": {
+              "type": "string",
+              "enum": [
+                "studio-workspace-only"
+              ]
+            },
+            "archiveBeforeDelete": {
+              "type": "boolean"
+            },
+            "retainSnapshots": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "launcher": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "windowsCommand": {
+              "$ref": "#/$defs/relativePath"
+            },
+            "windowsScript": {
+              "$ref": "#/$defs/relativePath"
+            },
+            "shortcutInstaller": {
+              "$ref": "#/$defs/relativePath"
+            },
+            "icon": {
+              "$ref": "#/$defs/relativePath"
+            }
+          }
+        },
+        "testFixture": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "pattern": "^(?:[A-Za-z]:|/|\\\\\\\\)"
+      },
+      "pattern": "^(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)).+$"
+    }
+  }
+}

@@ -1,87 +1,156 @@
-# USBKWA -- USB Keyboard Web App
+# RemoteDeck
 
-USBKWA (USB Keyboard Web App) turns a large tablet or any device with a Web
-browser into a USB keyboard. Anyone having difficulties using a regular
-keyboard may find a touch keyboard easier to use. More than one browser
-can be connected at the same time. A co-pilot can connect using a different
-computer or tablet to help the pilot (primary user) fly the computer.
+RemoteDeck turns an ESP32-S3 dev board into a browser-controlled USB HID keyboard, mouse, troubleshooting deck, and field IT toolkit.
 
-The first version used an Espressif ESP32-S2 Saola board which requires wiring
-a USB connector break out board. The latest version use an "Adafruit QT Py
-ESP32-S3 WiFi Dev Board with STEMMA QT - 8 MB Flash / No PSRAM" board. Using
-the QT Py board means there is no need to wire in a USB connector. The built-in
-USB Type C connector is all that is required.
+The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser connects to that page, sends actions over WebSocket, and the ESP32 forwards them to the USB-connected host as keyboard and mouse input.
 
 ![System Block Diagram](./images/usbkwa_system_diag.gif)
 
-[Screen capture of keyboard in browser window](./images/Screen_Keyboard.gif)
+[Original keyboard screen capture](./images/Screen_Keyboard.gif)
 
-The keyboard web app displays a 17x6 grid in the browser window. The locations
-of touch or mouse events are sent via a web socket back to the ESP32 web
-server. The server translates locations to USB HID keycodes and sends them out
-the USB HID keyboard interface.
+## What It Does
 
-The QT Py ESP32 S3 board is programmed using the Arduino IDE. No soldering or
-wiring is required.
-
-The ESP32 S2 Saola board is programmed using the Arduino IDE. No soldering is
-required but a USB connector break out board must be wired to the Saola board.
-
-The browser communicates to the ESP32 using WiFi. The ESP32 communicates with
-the other computer using USB HID.
+- Runs directly from an ESP32-S3 board with native USB HID support.
+- Creates a `RemoteDeck` WiFi access point and serves the control UI locally.
+- Provides a combined touchpad and responsive mobile keyboard screen.
+- Includes eight fast IT shortcuts below the touchpad.
+- Supports Windows, Linux/server, and macOS profiles.
+- Provides iPhone-style keyboard modes for letters, numbers, symbols, shift, and caps lock.
+- Supports touchpad movement, tap-to-click, two-finger right click, and two-finger scroll.
+- Includes IT-focused macros for common admin panels, shells, diagnostics, and repair commands.
+- Includes tools for device health, IP info, public IP, network snapshot, ticket info, system specs launcher, DNS lookup, port check, and Wake-on-LAN.
+- Includes captive portal behavior so phones and tablets can open the RemoteDeck page after joining WiFi.
+- Performs WiFi/AP health checks and attempts to recover the access point if it drops.
 
 ## Hardware
 
-The QT Py ESP32-S3 is easier to use and has the option of supporting BLE HID
-keyboard. The S3 has BLE (Bluetooth Low Energy) but the S2 does not.
+Primary target:
 
-### Adafruit QT Py ESP32-S3 board
+- ESP32-S3 dev board with native USB support.
+- Known-good target: Adafruit QT Py ESP32-S3 WiFi Dev Board with STEMMA QT, 8 MB flash, no PSRAM.
 
-No soldering or wiring is required. Just plug the board into the computer using
-an appropriate USB cable.
+Recommended Arduino board target:
 
-![QT Py ESPS2 S3 with USB cable](./images/qt_py_esp32_s3.jpg)
+```text
+esp32:esp32:adafruit_qtpy_esp32s3_nopsram
+```
 
-### Espressif ESP32-S2 Saola board
+Generic ESP32-S3 boards can work when native USB and USB HID are enabled for the selected board profile.
 
-On the Espressif Saola board, the USB micro connector is connected to a CP2102
-USB Serial chip. The USB HID data is on pin 19 and 20. A separate USB connector
-or cable must be connected to pins 19, 20, GND, and 5V. Do not use both
-connectors at the same time. If there is no protection diode on the 5V
-pin, board may be damaged. Connect to the built-in USB micro
-connector to program the ESP32. Disconnect the cable then plug it into the
-other USB micro connector to test the USB feature.
+ESP32-S2 boards can also work when native USB is exposed. On the Espressif ESP32-S2 Saola board, the built-in micro USB connector is connected to the serial chip, so USB HID requires wiring a separate USB connector to native USB pins:
 
-ESP32 S2 Saola      |USB micro connector
---------------------|---------------------
-GND                 |GND
-5V                  |VBUS
-19 (USB D-)         |D-
-20 (USB D+)         |D+
-not connected       |ID
+| ESP32-S2 Saola | USB connector |
+|---|---|
+| GND | GND |
+| 5V | VBUS |
+| 19 (USB D-) | D- |
+| 20 (USB D+) | D+ |
+| not connected | ID |
 
-In the following photo, the USB connector is a SparkFun micro USB breakout board
-connected to the ESP32 S2 Saola board using Dupont wires.
+Do not power a board through two USB connectors at the same time unless the board has the right protection circuitry.
 
-![ESPS2 S2 with second USB connector](./images/esp32s2_usb.jpg)
+## Arduino Dependencies
 
-This should work on any ESP32 S2 board but has only been tested on the
-Espressif Saola board. Regular ESP32 boards do not have native USB hardware so
-will not work. The not yet released ESP32 S3 should also work.
+Install these through Arduino IDE or `arduino-cli`:
 
-* [ESP32-S2-Saola-1](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/hw-reference/esp32s2/user-guide-saola-1-v1.2.html)
-* [USB Device Driver](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/api-reference/peripherals/usb_device.html)
+- Arduino ESP32 board package
+- WebSockets by Markus Sattler
+- ArduinoJson 7.x by Benoit Blanchon
+- WiFiManager by tzapu/tablatronix
 
-## Software
+## Build And Upload
 
-* [Arduino IDE 1.8.19](https://www.arduino.cc/en/software)
-* [Arduino ESP32 2.0.5](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html#installing-using-boards-manager)
+Using Arduino CLI:
 
-The following libraries can be installed using the IDE Library Manager.
+```powershell
+arduino-cli compile --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram .
+arduino-cli upload --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram -p COMx .
+```
 
-* [WebSockets by Markus Sattler](https://github.com/Links2004/arduinoWebSockets)
-* [ArduinoJson by Benoit Blanchon](https://arduinojson.org/)
-* [WiFiManager by tzapu/tablatronix](https://github.com/tzapu/WiFiManager)
+Replace `COMx` with your board port.
 
-The library manager installs WiFiManager 2.0.14-beta which includes support
-for Arduino-esp32 2.0.x and works on ESP32 S2 and S3 boards.
+Using Arduino IDE:
+
+1. Open `usbkwa.ino`.
+2. Select the ESP32-S3 board and serial port.
+3. Install the dependencies above.
+4. Compile and upload.
+5. Connect the ESP32 to the computer that should receive HID input.
+6. Join the `RemoteDeck` WiFi access point.
+7. Open `http://192.168.4.1` or `http://remotedeck.local`.
+
+The web app uses:
+
+- HTTP port `80`
+- WebSocket port `81`
+- DNS port `53` for captive portal detection
+
+## Client Compatibility
+
+The control surface is plain HTML, CSS, and JavaScript served directly by the ESP32. No native phone app is required.
+
+Supported client targets:
+
+- iPhone and iPad in Safari
+- Android phones and tablets in Chrome or another modern browser
+- Desktop browsers for setup, testing, and co-pilot control
+
+The UI uses safe-area padding, dynamic viewport units, pointer events, and responsive keyboard rows so portrait and landscape layouts keep the same core experience.
+
+## Tools And Macros
+
+Network tools run from the ESP32. DNS lookup, public IP, port check, and Wake-on-LAN need the ESP32 station connection to have access to the target network. Wake-on-LAN works best when the ESP32 is joined to the same LAN or VLAN as the sleeping device.
+
+The System Specs tool uses USB HID to open or target the selected OS shell:
+
+- PowerShell on Windows
+- Shell or terminal on Linux
+- Terminal on macOS
+
+It types a command that shows machine name, OS/version, CPU, and memory on the connected host. The ESP32 cannot read host output back into the web page unless a separate companion app is running on that host.
+
+Windows troubleshooting macros use PowerShell for read-only diagnostics and elevated CMD for repair actions such as SFC, DISM, DNS flush, Winsock reset, and GPUpdate. Windows will still show UAC on the connected PC; approve it there before the elevated command runs.
+
+RemoteDeck cannot directly detect the OS of the USB-connected host over HID. The profile auto-default is based on the browser device. Once you manually pick Windows, Linux, or macOS, that choice is saved in the browser and reused.
+
+## Health Endpoints
+
+These endpoints return JSON health snapshots:
+
+```text
+/status.json
+/health
+```
+
+They include firmware version, uptime, station/AP IPs, AP client count, RSSI, and free heap.
+
+## Project Files
+
+- `usbkwa.ino`: ESP32 firmware, USB HID handling, WiFi setup, HTTP server, WebSocket server, tools, and macros.
+- `index_html.h`: embedded RemoteDeck web app served by the ESP32.
+- `remotedeck.project.json`: optional RemoteDeck Studio manifest for import/testing workflows.
+- `remotedeck.project.schema.json`: manifest schema used by the validator.
+- `tools/validate-remotedeck-project.js`: dependency-free manifest validator.
+- `acli.sh` and `test.sh`: original Arduino helper scripts.
+- `images/`: screenshots and hardware reference images.
+
+Validate the manifest with:
+
+```powershell
+node tools/validate-remotedeck-project.js
+```
+
+## Current Status
+
+RemoteDeck is alpha software. It is working in live device testing, but it is still evolving quickly.
+
+Known next steps:
+
+- Broader ESP32-S3 board testing.
+- Better release packaging.
+- More field-tested IT macros.
+- Optional companion app for richer host feedback.
+
+## License
+
+MIT. See `LICENSE`.

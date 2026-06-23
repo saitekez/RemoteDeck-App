@@ -36,3 +36,16 @@
 *.jpg
 
 esp32.esp32.*/
+
+# Local launch helpers and generated logs
+Launch Codex Projector.cmd
+Launch RemoteDeck Studio.cmd
+codex_projector.html
+tools/*.log
+tools/launch-remotedeck-studio.ps1
+tools/install-remotedeck-studio-shortcut.ps1
+images/remotedeck-studio.ico
+
+# Studio planning handoff notes kept local to the development machine
+REMOTEDECK_STUDIO_HANDOFF.md
+REMOTEDECK_STUDIO_IMPORT_SPEC.md
