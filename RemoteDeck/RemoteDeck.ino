@@ -46,10 +46,14 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 const char *DEVICE_NAME = "RemoteDeck";
 const char *MDNS_NAME = "remotedeck";
-const char *FIRMWARE_VERSION = "1.0.1";
+const char *FIRMWARE_VERSION = "1.0.2";
 const char *BUILD_TARGET = "ESP32-S3 USB HID";
 const byte DNS_PORT = 53;
+const uint8_t WIFI_AP_CHANNEL = 6;
+const uint8_t WIFI_AP_MAX_CLIENTS = 4;
 const unsigned long WIFI_HEALTH_INTERVAL_MS = 10000;
+const unsigned long WIFI_AP_STARTUP_TIMEOUT_MS = 3500;
+const uint8_t WIFI_AP_STARTUP_RETRIES = 4;
 const uint8_t MAX_AP_RECOVERY_ATTEMPTS = 6;
 
 const int MAX_ROWS = 6;
@@ -81,20 +85,58 @@ bool accessPointLooksReady()
 bool startRemoteDeckAccessPoint(bool resetFirst)
 {
   WiFi.mode(WIFI_AP_STA);
+  WiFi.setSleep(false);
 
   if (resetFirst) {
-    WiFi.softAPdisconnect(true);
-    delay(100);
-  }
-
-  bool started = WiFi.softAP(DEVICE_NAME);
-
-  if (started) {
     dnsServer.stop();
-    dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+    WiFi.softAPdisconnect(true);
+    delay(250);
   }
 
-  return started;
+  WiFi.softAPConfig(
+    IPAddress(192, 168, 4, 1),
+    IPAddress(192, 168, 4, 1),
+    IPAddress(255, 255, 255, 0)
+  );
+
+  bool started = WiFi.softAP(
+    DEVICE_NAME,
+    nullptr,
+    WIFI_AP_CHANNEL,
+    false,
+    WIFI_AP_MAX_CLIENTS
+  );
+
+  if (started && accessPointLooksReady()) {
+    dnsServer.stop();
+    delay(20);
+    dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+    return true;
+  }
+
+  return false;
+}
+
+bool ensureRemoteDeckAccessPoint()
+{
+  for (uint8_t attempt = 0; attempt < WIFI_AP_STARTUP_RETRIES; attempt++) {
+    bool resetFirst = attempt > 0;
+
+    if (startRemoteDeckAccessPoint(resetFirst)) {
+      unsigned long startedAt = millis();
+
+      while (millis() - startedAt < WIFI_AP_STARTUP_TIMEOUT_MS) {
+        if (accessPointLooksReady()) {
+          apRecoveryAttempts = 0;
+          return true;
+        }
+
+        delay(75);
+      }
+    }
+  }
+
+  return false;
 }
 
 void maintainWifi()
@@ -108,7 +150,7 @@ void maintainWifi()
   lastWifiHealthCheck = now;
 
   if (!accessPointLooksReady()) {
-    bool recovered = startRemoteDeckAccessPoint(true);
+    bool recovered = ensureRemoteDeckAccessPoint();
     apRecoveryAttempts = recovered ? 0 : apRecoveryAttempts + 1;
 
     if (!recovered && apRecoveryAttempts >= MAX_AP_RECOVERY_ATTEMPTS) {
@@ -1266,8 +1308,11 @@ void handleNotFound()
 void setup()
 {
   DBG_begin(115200);
+  delay(300);
 
   WiFi.mode(WIFI_AP_STA);
+  WiFi.persistent(false);
+  WiFi.setSleep(false);
   WiFi.setHostname(MDNS_NAME);
 
   USB.usbClass(0);
@@ -1277,20 +1322,25 @@ void setup()
   Mouse.begin();
   USB.begin();
 
+  if (!ensureRemoteDeckAccessPoint()) {
+    delay(1000);
+    ESP.restart();
+  }
+
   WiFiManager wm;
   wm.setHostname(MDNS_NAME);
+  wm.setEnableConfigPortal(false);
+  wm.setConnectTimeout(8);
 
   bool res = wm.autoConnect(DEVICE_NAME);
 
-  if (!startRemoteDeckAccessPoint(false) && !startRemoteDeckAccessPoint(true)) {
+  if (!ensureRemoteDeckAccessPoint()) {
     delay(1000);
     ESP.restart();
   }
 
   if (!res) {
-    DBG_println(F("Failed to connect"));
-    delay(1000);
-    ESP.restart();
+    DBG_println(F("Station WiFi unavailable; continuing with RemoteDeck AP only"));
   }
 
   if (MDNS.begin(MDNS_NAME)) {
