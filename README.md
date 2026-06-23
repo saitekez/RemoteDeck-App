@@ -4,6 +4,8 @@ RemoteDeck turns an ESP32-S3 dev board into a browser-controlled USB HID keyboar
 
 The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser connects to that page, sends actions over WebSocket, and the ESP32 forwards them to the USB-connected host as keyboard and mouse input.
 
+![RemoteDeck workflow overview](./images/remotedeck-how-it-works.png)
+
 ![System Block Diagram](./images/remotedeck-system-diagram.gif)
 
 [Keyboard screen capture](./images/remotedeck-keyboard-screen.gif)
