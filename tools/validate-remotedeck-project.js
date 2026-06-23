@@ -48,11 +48,11 @@ const ISSUE_GUIDE = {
   },
   TOOL_NOT_HANDLED: {
     title: "A declared tool is missing a firmware handler",
-    fix: "Add a matching tool handler in usbkwa.ino or remove the tool action from the manifest."
+    fix: "Add a matching tool handler in RemoteDeck/RemoteDeck.ino or remove the tool action from the manifest."
   },
   SHORTCUT_NOT_HANDLED: {
     title: "A declared macro is missing a firmware handler",
-    fix: "Add a matching shortcut handler in usbkwa.ino or remove the action from the manifest profile."
+    fix: "Add a matching shortcut handler in RemoteDeck/RemoteDeck.ino or remove the action from the manifest profile."
   },
   UI_SHORTCUT_NOT_DECLARED: {
     title: "The UI sends a macro that is not declared in the manifest",
@@ -84,15 +84,15 @@ const ISSUE_GUIDE = {
   },
   HTTP_PORT_MISMATCH: {
     title: "Manifest HTTP port does not match firmware",
-    fix: "Update the manifest or the WebServer port in usbkwa.ino."
+    fix: "Update the manifest or the WebServer port in RemoteDeck/RemoteDeck.ino."
   },
   WEBSOCKET_PORT_MISMATCH: {
     title: "Manifest WebSocket port does not match firmware",
-    fix: "Update the manifest or the WebSocketsServer port in usbkwa.ino."
+    fix: "Update the manifest or the WebSocketsServer port in RemoteDeck/RemoteDeck.ino."
   },
   DNS_PORT_MISMATCH: {
     title: "Manifest captive DNS port does not match firmware",
-    fix: "Update the manifest or DNS_PORT in usbkwa.ino."
+    fix: "Update the manifest or DNS_PORT in RemoteDeck/RemoteDeck.ino."
   },
   MANIFEST_LIBRARY_MISSING: {
     title: "Firmware uses a library that is not listed in the manifest",
@@ -542,7 +542,7 @@ function validateManifestShape(manifest) {
     return;
   }
 
-  checkAllowedKeys(manifest, ["schema", "name", "description", "device", "firmware", "ui", "webSocketContract", "docs", "studioImport"], "manifest");
+    checkAllowedKeys(manifest, ["schema", "name", "description", "device", "firmware", "ui", "webSocketContract", "docs", "studioImport"], "manifest");
 
   if (manifest.schema !== "remotedeck.project.v1") {
     addError("UNSUPPORTED_SCHEMA", "Project schema must be remotedeck.project.v1.", {
@@ -620,33 +620,21 @@ function validateManifestShape(manifest) {
   }
 
   if (isPlainObject(manifest.docs)) {
-    checkAllowedKeys(manifest.docs, ["readme", "studioHandoff"], "docs");
+    checkAllowedKeys(manifest.docs, ["readme", "studioNotes"], "docs");
     requireString(manifest.docs, "readme", "docs");
-    requireString(manifest.docs, "studioHandoff", "docs");
+    if (manifest.docs.studioNotes !== undefined) {
+      requireString(manifest.docs, "studioNotes", "docs");
+    }
   }
 
   if (manifest.studioImport !== undefined) {
     if (!isPlainObject(manifest.studioImport)) {
       addError("INVALID_STUDIO_IMPORT", "manifest.studioImport must be an object when present.");
     } else {
-      checkAllowedKeys(manifest.studioImport, ["schemaFile", "validator", "spec", "launcher", "rollback", "testFixture"], "studioImport");
-      for (const key of ["schemaFile", "validator", "spec"]) {
+      checkAllowedKeys(manifest.studioImport, ["schemaFile", "validator", "rollback", "testFixture"], "studioImport");
+      for (const key of ["schemaFile", "validator"]) {
         if (manifest.studioImport[key] !== undefined) {
           requireString(manifest.studioImport, key, "studioImport");
-        }
-      }
-      if (manifest.studioImport.launcher !== undefined) {
-        if (!isPlainObject(manifest.studioImport.launcher)) {
-          addError("INVALID_LAUNCHER", "studioImport.launcher must be an object when present.", {
-            location: "studioImport.launcher"
-          });
-        } else {
-          checkAllowedKeys(manifest.studioImport.launcher, ["windowsCommand", "windowsScript", "shortcutInstaller", "icon"], "studioImport.launcher");
-          for (const key of ["windowsCommand", "windowsScript", "shortcutInstaller", "icon"]) {
-            if (manifest.studioImport.launcher[key] !== undefined) {
-              requireString(manifest.studioImport.launcher, key, "studioImport.launcher");
-            }
-          }
         }
       }
       if (manifest.studioImport.testFixture !== undefined && typeof manifest.studioImport.testFixture !== "boolean") {
@@ -710,28 +698,15 @@ function validateProject(manifest) {
   const uiPath = checkFile(manifest.firmware?.embeddedUi, "firmware.embeddedUi");
   const uiSourcePath = checkFile(manifest.ui?.source, "ui.source");
   checkFile(manifest.docs?.readme, "docs.readme");
-  checkFile(manifest.docs?.studioHandoff, "docs.studioHandoff");
+  if (manifest.docs?.studioNotes) {
+    checkFile(manifest.docs.studioNotes, "docs.studioNotes");
+  }
 
   if (manifest.studioImport?.schemaFile) {
     checkFile(manifest.studioImport.schemaFile, "studioImport.schemaFile");
   }
   if (manifest.studioImport?.validator) {
     checkFile(manifest.studioImport.validator, "studioImport.validator");
-  }
-  if (manifest.studioImport?.spec) {
-    checkFile(manifest.studioImport.spec, "studioImport.spec");
-  }
-  if (manifest.studioImport?.launcher?.windowsCommand) {
-    checkFile(manifest.studioImport.launcher.windowsCommand, "studioImport.launcher.windowsCommand");
-  }
-  if (manifest.studioImport?.launcher?.windowsScript) {
-    checkFile(manifest.studioImport.launcher.windowsScript, "studioImport.launcher.windowsScript");
-  }
-  if (manifest.studioImport?.launcher?.shortcutInstaller) {
-    checkFile(manifest.studioImport.launcher.shortcutInstaller, "studioImport.launcher.shortcutInstaller");
-  }
-  if (manifest.studioImport?.launcher?.icon) {
-    checkFile(manifest.studioImport.launcher.icon, "studioImport.launcher.icon");
   }
 
   if (uiPath && uiSourcePath && path.resolve(uiPath) !== path.resolve(uiSourcePath)) {

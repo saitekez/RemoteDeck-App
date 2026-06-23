@@ -13,8 +13,8 @@
     "captiveDnsPort": 53
   },
   "firmware": {
-    "entry": "usbkwa.ino",
-    "embeddedUi": "index_html.h",
+    "entry": "RemoteDeck/RemoteDeck.ino",
+    "embeddedUi": "RemoteDeck/index_html.h",
     "framework": "arduino",
     "libraries": [
       "WebSockets",
@@ -24,7 +24,7 @@
   },
   "ui": {
     "type": "embedded-html-header",
-    "source": "index_html.h",
+    "source": "RemoteDeck/index_html.h",
     "profiles": [
       "windows",
       "linux",
@@ -128,18 +128,11 @@
   },
   "docs": {
     "readme": "README.md",
-    "studioHandoff": "REMOTEDECK_STUDIO_HANDOFF.md"
+    "studioNotes": "README.md"
   },
   "studioImport": {
     "schemaFile": "remotedeck.project.schema.json",
     "validator": "tools/validate-remotedeck-project.js",
-    "spec": "REMOTEDECK_STUDIO_IMPORT_SPEC.md",
-    "launcher": {
-      "windowsCommand": "Launch RemoteDeck Studio.cmd",
-      "windowsScript": "tools/launch-remotedeck-studio.ps1",
-      "shortcutInstaller": "tools/install-remotedeck-studio-shortcut.ps1",
-      "icon": "images/remotedeck-studio.ico"
-    },
     "rollback": {
       "strategy": "transactional-workspace",
       "recordImportReceipt": true,

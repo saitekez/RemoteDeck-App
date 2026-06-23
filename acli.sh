@@ -1,6 +1,6 @@
 #!/bin/bash
 # $ source acli.sh
-PROJECT="usbkwa"
+PROJECT="RemoteDeck"
 ARDDIR=/tmp/acli_${PROJECT}_$$
 export ARDUINO_BOARD_MANAGER_ADDITIONAL_URLS="https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json"
 export ARDUINO_DIRECTORIES_DATA="${ARDDIR}/data"
@@ -18,8 +18,8 @@ arduino-cli lib --no-color install "WiFiManager"
 arduino-cli lib --no-color list
 #
 BOARD="esp32:esp32:adafruit_qtpy_esp32s3_nopsram"
-alias cc='arduino-cli compile --clean --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram'
-alias up='arduino-cli --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram upload --port /dev/ttyUSB0'
+alias cc='arduino-cli compile --clean --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram RemoteDeck'
+alias up='arduino-cli --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram upload --port /dev/ttyUSB0 RemoteDeck'
 ctags -R . ${ARDDIR}  ~/Sync/esp-idf/
 # Compile all examples for all boards with USB
 declare -A BOARDS=( [esp32:esp32:esp32s2]="" [esp32:esp32:esp32s3]="--board-options USBMode=default" [esp32:esp32:adafruit_qtpy_esp32s3_nopsram]="")

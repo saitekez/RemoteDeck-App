@@ -4,9 +4,9 @@ RemoteDeck turns an ESP32-S3 dev board into a browser-controlled USB HID keyboar
 
 The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser connects to that page, sends actions over WebSocket, and the ESP32 forwards them to the USB-connected host as keyboard and mouse input.
 
-![System Block Diagram](./images/usbkwa_system_diag.gif)
+![System Block Diagram](./images/remotedeck-system-diagram.gif)
 
-[Original keyboard screen capture](./images/Screen_Keyboard.gif)
+[Keyboard screen capture](./images/remotedeck-keyboard-screen.gif)
 
 ## What It Does
 
@@ -63,15 +63,15 @@ Install these through Arduino IDE or `arduino-cli`:
 Using Arduino CLI:
 
 ```powershell
-arduino-cli compile --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram .
-arduino-cli upload --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram -p COMx .
+arduino-cli compile --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram RemoteDeck
+arduino-cli upload --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram -p COMx RemoteDeck
 ```
 
 Replace `COMx` with your board port.
 
 Using Arduino IDE:
 
-1. Open `usbkwa.ino`.
+1. Open `RemoteDeck/RemoteDeck.ino`.
 2. Select the ESP32-S3 board and serial port.
 3. Install the dependencies above.
 4. Compile and upload.
@@ -126,8 +126,8 @@ They include firmware version, uptime, station/AP IPs, AP client count, RSSI, an
 
 ## Project Files
 
-- `usbkwa.ino`: ESP32 firmware, USB HID handling, WiFi setup, HTTP server, WebSocket server, tools, and macros.
-- `index_html.h`: embedded RemoteDeck web app served by the ESP32.
+- `RemoteDeck/RemoteDeck.ino`: ESP32 firmware, USB HID handling, WiFi setup, HTTP server, WebSocket server, tools, and macros.
+- `RemoteDeck/index_html.h`: embedded RemoteDeck web app served by the ESP32.
 - `remotedeck.project.json`: optional RemoteDeck Studio manifest for import/testing workflows.
 - `remotedeck.project.schema.json`: manifest schema used by the validator.
 - `tools/validate-remotedeck-project.js`: dependency-free manifest validator.

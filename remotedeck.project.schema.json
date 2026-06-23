@@ -189,15 +189,14 @@
     "docs": {
       "type": "object",
       "required": [
-        "readme",
-        "studioHandoff"
+        "readme"
       ],
       "additionalProperties": false,
       "properties": {
         "readme": {
           "$ref": "#/$defs/relativePath"
         },
-        "studioHandoff": {
+        "studioNotes": {
           "$ref": "#/$defs/relativePath"
         }
       }
@@ -210,9 +209,6 @@
           "$ref": "#/$defs/relativePath"
         },
         "validator": {
-          "$ref": "#/$defs/relativePath"
-        },
-        "spec": {
           "$ref": "#/$defs/relativePath"
         },
         "rollback": {

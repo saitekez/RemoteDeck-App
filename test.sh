@@ -1,17 +1,17 @@
 #!/bin/bash
 # $ source test.sh
 # $ ./arduino&
-PROJECT="usbkwa"
+PROJECT="RemoteDeck"
 IDEVER="1.8.19"
 machine=`uname -m`
 if [[ $machine =~ .*armv.* ]] ; then
-    WORKDIR="/var/tmp/autobuild_usbkwa_$$"
+    WORKDIR="/var/tmp/autobuild_remotedeck_$$"
     ARCH="linuxarm"
 elif [[ $machine =~ .*aarch64.* ]] ; then
-    WORKDIR="/var/tmp/autobuild_usbkwa_$$"
+    WORKDIR="/var/tmp/autobuild_remotedeck_$$"
     ARCH="linuxaarch64"
 else
-    WORKDIR="/tmp/autobuild_usbkwa_$$"
+    WORKDIR="/tmp/autobuild_remotedeck_$$"
     ARCH="linux64"
 fi
 mkdir -p ${WORKDIR}
@@ -47,6 +47,6 @@ CC="arduino --verify --board ${BOARD}"
 arduino --install-library "WebSockets"
 arduino --install-library "ArduinoJson"
 arduino --install-library "WiFiManager"
-ln -s ~/Sync/usbkwa ${LIBDIR}/..
+ln -s "$(pwd)/RemoteDeck" "${LIBDIR}/../RemoteDeck"
 cd ${IDEDIR}
 ctags -R . ~/Sync/esp-idf
