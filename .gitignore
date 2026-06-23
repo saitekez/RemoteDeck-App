@@ -49,3 +49,6 @@ images/remotedeck-studio.ico
 # Studio planning handoff notes kept local to the development machine
 REMOTEDECK_STUDIO_HANDOFF.md
 REMOTEDECK_STUDIO_IMPORT_SPEC.md
+
+# Local RemoteDeck credentials
+RemoteDeck/remotedeck_secrets.h

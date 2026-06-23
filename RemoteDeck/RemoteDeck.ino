@@ -21,6 +21,20 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
+#if defined(__has_include)
+#if __has_include("remotedeck_secrets.h")
+#include "remotedeck_secrets.h"
+#endif
+#endif
+
+#ifndef REMOTEDECK_AP_PASSWORD
+#define REMOTEDECK_AP_PASSWORD "RemoteDeck123"
+#endif
+
+#ifndef REMOTEDECK_CONTROL_PIN
+#define REMOTEDECK_CONTROL_PIN ""
+#endif
+
 #define DEBUG_ON 0
 #if DEBUG_ON
 #define DBG_begin(...)    Serial.begin(__VA_ARGS__)
@@ -46,8 +60,10 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 const char *DEVICE_NAME = "RemoteDeck";
 const char *MDNS_NAME = "remotedeck";
-const char *FIRMWARE_VERSION = "1.0.2";
+const char *FIRMWARE_VERSION = "1.0.3";
 const char *BUILD_TARGET = "ESP32-S3 USB HID";
+const char *AP_PASSWORD = REMOTEDECK_AP_PASSWORD;
+const char *CONTROL_PIN = REMOTEDECK_CONTROL_PIN;
 const byte DNS_PORT = 53;
 const uint8_t WIFI_AP_CHANNEL = 6;
 const uint8_t WIFI_AP_MAX_CLIENTS = 4;
@@ -70,6 +86,26 @@ const uint8_t Keycodes[MAX_ROWS][MAX_COLS] = {
 
 unsigned long lastWifiHealthCheck = 0;
 uint8_t apRecoveryAttempts = 0;
+
+bool apPasswordEnabled()
+{
+  return AP_PASSWORD != nullptr && strlen(AP_PASSWORD) >= 8;
+}
+
+bool controlPinRequired()
+{
+  return CONTROL_PIN != nullptr && CONTROL_PIN[0] != '\0';
+}
+
+bool controlPinMatches(JsonDocument &doc)
+{
+  if (!controlPinRequired()) {
+    return true;
+  }
+
+  const char *pin = doc["pin"] | "";
+  return strcmp(pin, CONTROL_PIN) == 0;
+}
 
 bool wifiModeHasAp()
 {
@@ -101,7 +137,7 @@ bool startRemoteDeckAccessPoint(bool resetFirst)
 
   bool started = WiFi.softAP(
     DEVICE_NAME,
-    nullptr,
+    apPasswordEnabled() ? AP_PASSWORD : nullptr,
     WIFI_AP_CHANNEL,
     false,
     WIFI_AP_MAX_CLIENTS
@@ -649,6 +685,8 @@ void populateDeviceStatus(JsonDocument &doc)
   doc["version"] = FIRMWARE_VERSION;
   doc["target"] = BUILD_TARGET;
   doc["mdns"] = MDNS_NAME;
+  doc["apProtected"] = apPasswordEnabled();
+  doc["controlPinRequired"] = controlPinRequired();
   doc["uptimeMs"] = millis();
   doc["stationConnected"] = WiFi.status() == WL_CONNECTED;
   doc["ssid"] = WiFi.SSID();
@@ -1226,6 +1264,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
         const char *action = doc["action"] | "";
 
         if (event[0] == '\0') {
+          return;
+        }
+
+        if (!controlPinMatches(doc)) {
+          sendError(num, action[0] ? action : event, "Unlock RemoteDeck before sending controls.");
           return;
         }
 

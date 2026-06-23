@@ -13,7 +13,7 @@ The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser 
 ## What It Does
 
 - Runs directly from an ESP32-S3 board with native USB HID support.
-- Creates a `RemoteDeck` WiFi access point and serves the control UI locally.
+- Creates a password-protected `RemoteDeck` WiFi access point and serves the control UI locally.
 - Provides a combined touchpad and responsive mobile keyboard screen.
 - Includes eight fast IT shortcuts below the touchpad.
 - Supports Windows, Linux/server, and macOS profiles.
@@ -79,13 +79,32 @@ Using Arduino IDE:
 4. Compile and upload.
 5. Connect the ESP32 to the computer that should receive HID input.
 6. Join the `RemoteDeck` WiFi access point.
-7. Open `http://192.168.4.1` or `http://remotedeck.local`.
+7. Enter the default WiFi password, `RemoteDeck123`.
+8. Open `http://192.168.4.1` or `http://remotedeck.local`.
 
 The web app uses:
 
 - HTTP port `80`
 - WebSocket port `81`
 - DNS port `53` for captive portal detection
+
+## Local Security
+
+RemoteDeck intentionally serves the control page over HTTP because browser-trusted HTTPS is not practical for a self-hosted ESP32 hotspot at `192.168.4.1`. The safer field setup is to protect the WiFi link with WPA2 and keep the device on its own local network.
+
+The default access point password is:
+
+```text
+RemoteDeck123
+```
+
+For field use, change it before publishing or deploying a build:
+
+1. Copy `RemoteDeck/remotedeck_secrets.example.h` to `RemoteDeck/remotedeck_secrets.h`.
+2. Set `REMOTEDECK_AP_PASSWORD` to a private 8-63 character password.
+3. Optionally set `REMOTEDECK_CONTROL_PIN` to require a one-time browser unlock before keyboard, mouse, tool, or macro commands are accepted.
+
+`remotedeck_secrets.h` is ignored by git so private credentials stay off GitHub.
 
 ## Client Compatibility
 

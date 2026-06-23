@@ -103,6 +103,11 @@ button:focus-visible {
     gap: 8px;
 }
 
+.connectionArea {
+    display: grid;
+    gap: 6px;
+}
+
 #statusBar {
     display: flex;
     align-items: center;
@@ -135,6 +140,55 @@ button:focus-visible {
 
 #statusBar.offline {
     color: #ffb8b4;
+}
+
+.securityBar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 6px;
+    align-items: center;
+}
+
+.securityBar input {
+    min-width: 0;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(8, 9, 11, 0.82);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.securityBar input:focus {
+    border-color: var(--accent-blue);
+    outline: none;
+}
+
+.securityBar button {
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    background:
+        linear-gradient(180deg, rgba(63, 185, 80, 0.30), rgba(27, 93, 49, 0.35)),
+        #203126;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.securityState {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.securityState.unlocked {
+    color: #b7f5c4;
 }
 
 .profileBar {
@@ -636,7 +690,14 @@ button:focus-visible {
         <button id="rightNav" class="panelBtn" type="button" onclick="navRight()">Macros</button>
     </nav>
 
-    <div id="statusBar" class="offline">Disconnected</div>
+    <div class="connectionArea">
+        <div id="statusBar" class="offline">Disconnected</div>
+        <div id="securityBar" class="securityBar" hidden>
+            <input id="controlPinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="Control PIN" aria-label="Control PIN">
+            <button id="controlPinButton" type="button" onclick="saveControlPin()">Unlock</button>
+            <span id="securityState" class="securityState">Locked</span>
+        </div>
+    </div>
 
     <div class="profileBar" aria-label="Target operating system">
         <button id="profileWindows" class="profileBtn active" type="button" onclick="setProfile('windows')">Windows</button>
@@ -735,6 +796,8 @@ let previousPage = "deck";
 let selectedTool = "";
 let activeProfile = "windows";
 let statusRestoreTimer = 0;
+let controlPinRequired = false;
+let controlPin = loadControlPin();
 
 const adminActions = new Set([
     "cmdadmin",
@@ -895,6 +958,53 @@ const profileConfig = {
 
 function byId(id) {
     return document.getElementById(id);
+}
+
+function loadControlPin() {
+    try {
+        return window.localStorage.getItem("remotedeckControlPin") || "";
+    } catch (err) {
+        return "";
+    }
+}
+
+function persistControlPin(pin) {
+    try {
+        if (pin) {
+            window.localStorage.setItem("remotedeckControlPin", pin);
+        } else {
+            window.localStorage.removeItem("remotedeckControlPin");
+        }
+    } catch (err) {
+        return;
+    }
+}
+
+function updateSecurityBar() {
+    const bar = byId("securityBar");
+    const input = byId("controlPinInput");
+    const state = byId("securityState");
+
+    if (!bar || !input || !state) {
+        return;
+    }
+
+    bar.hidden = !controlPinRequired;
+
+    if (controlPinRequired && input.value !== controlPin) {
+        input.value = controlPin;
+    }
+
+    state.textContent = controlPin ? "Unlocked" : "Locked";
+    state.classList.toggle("unlocked", !!controlPin);
+}
+
+function saveControlPin() {
+    const input = byId("controlPinInput");
+    controlPin = input.value.trim();
+    persistControlPin(controlPin);
+    updateSecurityBar();
+    flashStatus(controlPin ? "Unlocked" : "PIN Cleared");
 }
 
 function savedProfile() {
@@ -1135,7 +1245,13 @@ function goBack() {
 
 function sendMessage(message) {
     if (websock && websock.readyState === WebSocket.OPEN) {
-        websock.send(JSON.stringify(message));
+        const payload = Object.assign({}, message);
+
+        if (controlPin) {
+            payload.pin = controlPin;
+        }
+
+        websock.send(JSON.stringify(payload));
         return true;
     }
 
@@ -1608,11 +1724,20 @@ function runWakeOnLan() {
 
 function handleMessage(data) {
     if (data.error) {
+        if (data.error.indexOf("Unlock RemoteDeck") === 0) {
+            controlPinRequired = true;
+            updateSecurityBar();
+            flashStatus("Unlock Required");
+        }
+
         byId("toolStatus").textContent = data.error;
         return;
     }
 
     if (data.action === "status") {
+        controlPinRequired = !!data.controlPinRequired;
+        updateSecurityBar();
+
         if (data.version) {
             setStatus("Connected v" + data.version, "online");
         }
@@ -1667,15 +1792,26 @@ function setupToolInputs() {
     });
 }
 
+function setupSecurityInput() {
+    byId("controlPinInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            saveControlPin();
+        }
+    });
+}
+
 function start() {
     activeProfile = initialProfile();
     updateProfileButtons();
     renderQuickGrid();
     renderMacros();
     updateNav();
+    updateSecurityBar();
     createKeyboard();
     setupTouchpad();
     setupToolInputs();
+    setupSecurityInput();
     connectSocket();
 }
 
