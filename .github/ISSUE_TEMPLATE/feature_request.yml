@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest a RemoteDeck improvement.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What should RemoteDeck help with?
+      description: Describe the workflow, device, or field task.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Keyboard and touchpad
+        - Tools
+        - Macros
+        - Android TV remote
+        - Settings
+        - Hardware support
+        - Documentation
+        - Other
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposed behavior
+      description: What would a good solution look like?

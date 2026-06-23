@@ -1,0 +1,54 @@
+name: RemoteDeck CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate manifest and embedded UI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate RemoteDeck manifest
+        run: node tools/validate-remotedeck-project.js
+
+      - name: Validate embedded UI
+        run: node tools/validate-embedded-ui.js
+
+  arduino:
+    name: Compile ESP32-S3 firmware
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Install ESP32 board package
+        run: |
+          arduino-cli config init --overwrite
+          arduino-cli config set board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32@2.0.14
+
+      - name: Install Arduino libraries
+        run: |
+          arduino-cli lib install "ArduinoJson"
+          arduino-cli lib install "WiFiManager"
+          arduino-cli lib install "WebSockets"
+
+      - name: Compile RemoteDeck firmware
+        run: arduino-cli compile --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram RemoteDeck

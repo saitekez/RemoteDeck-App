@@ -1,6 +1,8 @@
 # RemoteDeck
 
-RemoteDeck turns an ESP32-S3 dev board into a browser-controlled USB HID keyboard, mouse, troubleshooting deck, and field IT toolkit. I do a lot of homelab and IT work and sometimes I just want a quick and easy on the go keyboard and mouse and for me this is minimalistic and hoping this can help someone else as well.
+[![RemoteDeck CI](https://github.com/saitekez/RemoteDeck-App/actions/workflows/ci.yml/badge.svg)](https://github.com/saitekez/RemoteDeck-App/actions/workflows/ci.yml)
+
+RemoteDeck turns an ESP32-S3 dev board into a browser-controlled USB HID keyboard, mouse, troubleshooting deck, and field IT toolkit. I do a lot of homelab and IT work, and sometimes I just want a quick, easy, on-the-go keyboard and mouse. RemoteDeck is intentionally minimal, and I hope it can help someone else too.
 
 The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser connects to that page, sends actions over WebSocket, and the ESP32 forwards them to the USB-connected host as keyboard and mouse input.
 
@@ -76,6 +78,14 @@ arduino-cli upload --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram -p COMx Remo
 ```
 
 Replace `COMx` with your board port.
+
+Before uploading a release candidate, run:
+
+```powershell
+node tools/validate-remotedeck-project.js
+node tools/validate-embedded-ui.js
+arduino-cli compile --fqbn esp32:esp32:adafruit_qtpy_esp32s3_nopsram RemoteDeck
+```
 
 Using Arduino IDE:
 
@@ -162,6 +172,7 @@ They include firmware version, uptime, station/AP IPs, AP client count, RSSI, an
 - `remotedeck.project.json`: optional RemoteDeck Studio manifest for import/testing workflows.
 - `remotedeck.project.schema.json`: manifest schema used by the validator.
 - `tools/validate-remotedeck-project.js`: dependency-free manifest validator.
+- `tools/validate-embedded-ui.js`: embedded web UI syntax and startup validator.
 - `acli.sh` and `test.sh`: original Arduino helper scripts.
 - `images/`: screenshots and hardware reference images.
 
@@ -169,7 +180,12 @@ Validate the manifest with:
 
 ```powershell
 node tools/validate-remotedeck-project.js
+node tools/validate-embedded-ui.js
 ```
+
+GitHub Actions also runs these checks and compiles the ESP32-S3 firmware on pushes and pull requests.
+
+See `RELEASE_CHECKLIST.md` before tagging or publishing a release.
 
 ## Current Status
 
@@ -178,7 +194,6 @@ RemoteDeck is alpha software. It is working in live device testing, but it is st
 Known next steps:
 
 - Broader ESP32-S3 board testing.
-- Better release packaging.
 - More field-tested IT macros.
 - Optional companion app for richer host feedback.
 

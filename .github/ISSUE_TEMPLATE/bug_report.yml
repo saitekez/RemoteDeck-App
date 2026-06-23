@@ -1,0 +1,48 @@
+name: Bug report
+description: Report something that is not working as expected.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the issue and what you expected RemoteDeck to do.
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware version
+      description: Shown in the RemoteDeck status line after connecting.
+      placeholder: "1.0.7"
+  - type: input
+    id: board
+    attributes:
+      label: ESP32 board
+      placeholder: "Adafruit QT Py ESP32-S3, ESP32-S3 Super Mini, etc."
+  - type: dropdown
+    id: profile
+    attributes:
+      label: Active profile
+      options:
+        - Windows
+        - Linux
+        - macOS
+        - Android TV
+        - Not sure
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the shortest path that causes the issue.
+      placeholder: |
+        1. Flash firmware
+        2. Join RemoteDeck WiFi
+        3. Tap ...
+  - type: textarea
+    id: notes
+    attributes:
+      label: Extra notes
+      description: Add browser, phone/tablet model, host OS, serial logs, screenshots, or anything else useful.
