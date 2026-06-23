@@ -1,6 +1,6 @@
 # RemoteDeck
 
-RemoteDeck turns an ESP32-S3 dev board into a browser-controlled USB HID keyboard, mouse, troubleshooting deck, and field IT toolkit.
+RemoteDeck turns an ESP32-S3 dev board into a browser-controlled USB HID keyboard, mouse, troubleshooting deck, and field IT toolkit. I do a lot of homelab and IT work and sometimes I just want a quick and easy on the go keyboard and mouse and for me this is minimalistic and hoping this can help someone else as well.
 
 The ESP32 serves a local web app over WiFi. A phone, tablet, or desktop browser connects to that page, sends actions over WebSocket, and the ESP32 forwards them to the USB-connected host as keyboard and mouse input.
 
